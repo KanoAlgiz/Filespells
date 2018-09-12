@@ -13,19 +13,14 @@ class Target {
         last = path;
     }
 
-    Target(Path p){
-        path = p;
-        last = p;
-    }
-
     void set(Path path){
         if(!this.path.equals(path)) last = this.path;
-        this.path = path;
+        this.path = path.normalize();
     }
 
     void set(String path){
-        if(!this.path.equals(Paths.get(path.substring(1)))) last = this.path;
-        this.path = Paths.get(path.substring(1));
+        if (!this.path.equals(Paths.get(path))) last = this.path;
+        this.path = Paths.get(path).normalize();
     }
 
     Path get(){
