@@ -1,5 +1,6 @@
 package localhost;
 
+import java.io.BufferedReader;
 import java.io.IOException;
 import java.nio.file.*;
 import java.util.ArrayList;
@@ -12,7 +13,7 @@ import static localhost.Checks.pathExists;
 
 public class Main {
 
-    public static void main(String[] args) throws IOException {
+    public static void main(String[] args) throws IOException, InterruptedException {
         Scanner scanner = new Scanner(System.in);
         Target target = new Target();
         Target temp = new Target();
@@ -43,6 +44,15 @@ public class Main {
                     case "home":
                         target.set(Paths.get(System.getProperty("user.dir")));
                         break;
+                    case "read":
+                    case "open":
+                        String line;
+                        try (BufferedReader reader = Files.newBufferedReader(target.get())) {
+                            while ((line = reader.readLine()) != null) {
+                                System.out.println(line);
+                            }
+                        }
+                        break;
                     case "size":
                         System.out.println("Size of " + target.get().getFileName() + " is " + Files.size(target.get()) + " bytes.");
                         break;
@@ -55,6 +65,45 @@ public class Main {
                                 System.out.println("\t" + file.getFileName());
                             }
                         }
+                        break;
+                    case "jump":
+                        word += 2;
+                        break;
+                    case "goto":
+                        try {
+                            int num = Integer.parseInt(nextWord);
+                            if (num > 0) {
+                                word = num - 2;
+                            } else {
+                                word++;
+                            }
+                        } catch (NumberFormatException e) {
+                            System.out.println("Given \"goto\" argument is not a number!");
+                        }
+                        break;
+                    case "msg":
+                    case "print":
+                    case "console":
+                        System.out.println(nextWord);
+                        word++;
+                        break;
+                    case "x":
+                        break;
+                    case "wait":
+                    case "sleep":
+                        Thread.sleep(1000);
+                        break;
+                    case "ifexists":
+                        if (!Files.exists(target.getDir().resolve(nextWord))) {
+                            word += 2;
+                        }
+                        word++;
+                        break;
+                    case "ifmissing":
+                        if (Files.exists(target.getDir().resolve(nextWord))) {
+                            word += 2;
+                        }
+                        word++;
                         break;
                     case "delete":
                     case "del":
@@ -70,6 +119,7 @@ public class Main {
                         pick.set(pick.last());
                         break;
                     case "log":
+                    case "write":
                         if (correctArg(spell.get(word + 1))) {
                             if (Files.isRegularFile(target.get())) {
                                 String s = nextWord + System.getProperty("line.separator");
@@ -162,7 +212,6 @@ public class Main {
                         target.set(target.get().getRoot().toAbsolutePath());
                         break;
                     case "go":
-                    case "goto":
                     case "path":
                         if (correctArg(spell.get(word + 1))) {
                             try {
@@ -182,6 +231,9 @@ public class Main {
                         break progcycle;
                     case "stop":
                         break spellcycle;
+                    case "unzip":
+                        Utils.unzip(pick.get(), target.getDir());
+                        break;
                     default:
                         if (thisWord.charAt(0) == '\\' || thisWord.charAt(0) == '/') {
                             thisWord = thisWord.substring(1);
